@@ -16,6 +16,7 @@ import os
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
+from time import sleep
 
 # read secrets from env vars
 env_path = Path('.') / '.env'
@@ -86,6 +87,7 @@ def parseArgs():
 def main():
     action = parseArgs()
     login()
+    sleep(5)
     toggleAP(AP_GUID,action)
     logout()
 
