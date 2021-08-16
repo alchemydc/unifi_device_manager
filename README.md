@@ -12,8 +12,26 @@ This script logs into the new UnifiOS API, and toggles AP's on and off (disablin
 It's designed to be called from cron or another scheduler, to automatically turn AP's off at night,
 and back on in the am.
 
-This could be easily extended to do other things on a schedule, like block the teenager's wired PS5,
-and other useful stuff that's not yet exposed via the GUI.
+This has now been extended to do other things on a schedule, like block specific switchports by setting their port profile to 'Disabled'.
+This can be super handy for blocking teenagers' wired PS5, gaming PC, wired smart TV, etc. so that they can focus on homework
+on school nights, etc.
+
+### Usage
+Invoke unifi_device_manager.py with one of the following CLI params:
+ * enableAP
+ * disableAP
+ * enableSwitchPort
+ * disableSwitchPort
+
+disableAP: disables the radios on a Unifi AP
+enableAP:  enables the radios on a Unifi AP
+disableSwitchPort: sends a JSON blob of switchport overrides to a unifi switch, or an AP with switchports.  useful for disabling switchports, etc.
+enableSwitchPort: sends a JSON blob of switchport overrides to a unifi switch, or an AP with switchports.  useful for enabling switchports, etc.
+
+disableSwitchPorts / enableSwitchPort reads JSON blobs out of environment variables that must include config for *every switchport on the device*, not just the one you want 
+to change.
+
+This is obviously not ideal, but seems to be a hard constraint at this point.
 
 
 ## Gratitude
@@ -66,11 +84,17 @@ cp .env-template .env
 chmod 600 .env
 ```
 
+Note that the portconf_id's will be specific to your environment, so double check that these are correct.
+
+
 2. Populate the .env file with the *local* username, password, BaseURL and AP GUID for your Unifi installation
 
 ## Test run
 ```console
-python3 unifi_device_manager.py disable
+python3 unifi_device_manager.py disableAP
+python3 unifi_device_manager.py disableSwitchPort
+python3 unifi_device_manager.py enableAP
+python3 unifi_device_manager.py enableSwitchPort
 ```
 
 ## Schedule it to run automatically

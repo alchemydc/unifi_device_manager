@@ -25,10 +25,10 @@ USERNAME = os.getenv('USERNAME')
 PASSWORD = os.getenv('PASSWORD')
 BASEURL = os.getenv('BASEURL')
 SITE = os.getenv('SITE')
-UPSTAIRS_AP_GUID = os.getenv('UPSTAIRS_AP_GUID')
-GAMEROOM_AP_GUID = os.getenv('GAMEROOM_AP_GUID')
-GAMEROOM_SWITCH_ENABLE_OVERRIDES = os.getenv('AP_SWITCH_ENABLE_OVERRIDES')
-GAMEROOM_SWITCH_DISABLE_OVERRIDES = os.getenv('AP_SWITCH_DISABLE_OVERRIDES')
+AP_GUID = os.getenv('AP_GUID')
+SWITCH_GUID = os.getenv('SWITCH_GUID')
+SWITCH_ENABLE_OVERRIDES = os.getenv('SWITCH_ENABLE_OVERRIDES')
+SWITCH_DISABLE_OVERRIDES = os.getenv('SWITCH_DISABLE_OVERRIDES')
 
 # constants
 LOGINURL = BASEURL + '/api/auth/login'
@@ -91,23 +91,23 @@ def OverrideSwitchPort(guid, jsonPutData):
 
 def parseArgs():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="'enableAP' or 'disableAP' or 'enableSwitchPort' or 'disableSwitchPort' (no quotes)")
+    parser.add_argument("action", help="'enableAP' or 'disableAP' or 'enableSwitchPorts' or 'disableSwitchPorts' (no quotes)")
     args = parser.parse_args()
-    if args.action == "enableAP" or args.action == "disableAP" or args.action == "enableSwitchPort" or args.action == "disableSwitchPort":
+    if args.action == "enableAP" or args.action == "disableAP" or args.action == "enableSwitchPorts" or args.action == "disableSwitchPorts":
         return(args.action)
     else:
-        sys.exit("Invalid action specified. Please pass 'enableAP', 'disableAP', 'enableSwitchPort' or 'disableSwitchPort' as a cli arg")
+        sys.exit("Invalid action specified. Please pass 'enableAP', 'disableAP', 'enableSwitchPorts' or 'disableSwitchPorts' as a cli arg")
 
 def main():
     action = parseArgs()
     login()
     sleep(5)
     if(action == "enableAP" or action == "disableAP"):
-        toggleAP(UPSTAIRS_AP_GUID,action)
-    elif(action == "disableSwitchPort"):
-        OverrideSwitchPort(GAMEROOM_AP_GUID, GAMEROOM_SWITCH_DISABLE_OVERRIDES)
-    elif(action == "enableSwitchPort"):
-        OverrideSwitchPort(GAMEROOM_AP_GUID, GAMEROOM_SWITCH_ENABLE_OVERRIDES)
+        toggleAP(AP_GUID,action)
+    elif(action == "disableSwitchPorts"):
+        OverrideSwitchPort(SWITCH_GUID, SWITCH_DISABLE_OVERRIDES)
+    elif(action == "enableSwitchPorts"):
+        OverrideSwitchPort(SWITCH_GUID, SWITCH_ENABLE_OVERRIDES)
     logout()
 
 if __name__ == "__main__":
