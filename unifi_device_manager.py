@@ -25,7 +25,10 @@ USERNAME = os.getenv('USERNAME')
 PASSWORD = os.getenv('PASSWORD')
 BASEURL = os.getenv('BASEURL')
 SITE = os.getenv('SITE')
-AP_GUID = os.getenv('UPSTAIRSAP_GUID')
+UPSTAIRS_AP_GUID = os.getenv('UPSTAIRS_AP_GUID')
+GAMEROOM_AP_GUID = os.getenv('GAMEROOM_AP_GUID')
+GAMEROOM_SWITCH_ENABLE_OVERRIDES = os.getenv('AP_SWITCH_ENABLE_OVERRIDES')
+GAMEROOM_SWITCH_DISABLE_OVERRIDES = os.getenv('AP_SWITCH_DISABLE_OVERRIDES')
 
 # constants
 LOGINURL = BASEURL + '/api/auth/login'
@@ -65,30 +68,46 @@ def toggleAP(guid, action):
     """
     Toggles an AP into 'disabled' mode and back. Perhaps useful for reducing RF exposure during sleep.
     Note the guid is NOT the MAC addr of the AP.
-    To get the guid call FIXME $baseurl/api/s/$site/stat/device
+    To get the guid use the browser dev console
     """
     APURL = BASEURL + '/proxy/network/api/s/' + SITE + '/rest/device/' + guid
-    if action == "enable":
+    if action == "enableAP":
         disableFlag = False
-    elif action == "disable":
+    elif action == "disableAP":
         disableFlag = True
     payload = json.dumps({'disabled': disableFlag})
     response = http.put(APURL, data = payload)
 
+def OverrideSwitchPort(guid, jsonPutData):
+    """
+    Sets switch port overrides for a device, eg an AP. Useful for disabling wired connections
+    to ensure that kids go to bed instead of staying up all night watching TV or playing games
+    To get the guid use the browser dev console
+    The jsonPutData is read as an env var, and must contain config data for ALL switchports on the device, else defaults will be written
+    to unchanged ports.  See env.example
+    """
+    APURL = BASEURL + '/proxy/network/api/s/' + SITE + '/rest/device/' + guid
+    response = http.put(APURL, data = jsonPutData)
+
 def parseArgs():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", help="'enable' or 'disable' (no quotes)")
+    parser.add_argument("action", help="'enableAP' or 'disableAP' or 'enableSwitchPort' or 'disableSwitchPort' (no quotes)")
     args = parser.parse_args()
-    if args.action == "enable" or args.action == "disable":
+    if args.action == "enableAP" or args.action == "disableAP" or args.action == "enableSwitchPort" or args.action == "disableSwitchPort":
         return(args.action)
     else:
-        sys.exit("Invalid action specified. Please pass 'enable' or 'disable' as a cli arg")
+        sys.exit("Invalid action specified. Please pass 'enableAP', 'disableAP', 'enableSwitchPort' or 'disableSwitchPort' as a cli arg")
 
 def main():
     action = parseArgs()
     login()
     sleep(5)
-    toggleAP(AP_GUID,action)
+    if(action == "enableAP" or action == "disableAP"):
+        toggleAP(UPSTAIRS_AP_GUID,action)
+    elif(action == "disableSwitchPort"):
+        OverrideSwitchPort(GAMEROOM_AP_GUID, GAMEROOM_SWITCH_DISABLE_OVERRIDES)
+    elif(action == "enableSwitchPort"):
+        OverrideSwitchPort(GAMEROOM_AP_GUID, GAMEROOM_SWITCH_ENABLE_OVERRIDES)
     logout()
 
 if __name__ == "__main__":
